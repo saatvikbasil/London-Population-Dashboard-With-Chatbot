@@ -55,7 +55,7 @@ class Chatbot:
             app: The Flask application context.
         """
         self.app = app
-        self.api_key = "AIzaSyBWj9ijfY6woq_5HSfVwVNvetKHdb4d3qE"
+        self.api_key = "Enter API KEY, Saved as Env Variable"
 
         # Initialize Gemini AI
         genai.configure(api_key=self.api_key)

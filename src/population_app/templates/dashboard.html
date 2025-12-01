@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block head %}
+<!-- Additional CSS for dashboard page -->
+<style>
+    .filter-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1e3c72;
+    }
+    
+    .chart-container {
+        min-height: 400px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .chart-container:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transform: translateY(-5px);
+    }
+    
+    .chart-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1e3c72;
+        border-bottom: 2px solid #f0f2f5;
+        padding-bottom: 0.5rem;
+    }
+    
+    .filter-panel {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4 fw-bold">Population Dashboard</h1>
+
+<!-- Filter panel -->
+<div class="filter-panel">
+    <h2 class="filter-title">
+        <i class="fas fa-filter me-2"></i>Data Filters
+    </h2>
+    
+    <form method="POST" action="{{ url_for('main.dashboard') }}">
+        {{ form.csrf_token }}
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="{{ form.location.id }}" class="form-label">Location</label>
+                {{ form.location(class="form-select shadow-sm") }}
+            </div>
+            <div class="col-md-4">
+                <label for="{{ form.demographic.id }}" class="form-label">Age Group</label>
+                {{ form.demographic(class="form-select shadow-sm") }}
+            </div>
+            <div class="col-md-4">
+                <label for="{{ form.gender.id }}" class="form-label">Gender</label>
+                {{ form.gender(class="form-select shadow-sm") }}
+            </div>
+        </div>
+        
+        <div class="row g-3 mt-1">
+            <div class="col-md-4">
+                <label for="{{ form.start_year.id }}" class="form-label">From Year</label>
+                {{ form.start_year(class="form-select shadow-sm") }}
+            </div>
+            <div class="col-md-4">
+                <label for="{{ form.end_year.id }}" class="form-label">To Year</label>
+                {{ form.end_year(class="form-select shadow-sm") }}
+            </div>
+            <div class="col-md-4">
+                <label for="{{ form.metric_type.id }}" class="form-label">Metric Type</label>
+                {{ form.metric_type(class="form-select shadow-sm") }}
+            </div>
+        </div>
+        
+        <div class="text-end mt-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-sync-alt me-2"></i>Update Dashboard
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Charts section -->
+<div class="row">
+    <!-- Population Trend Chart -->
+    <div class="col-lg-12">
+        <div class="chart-container">
+            <h3 class="chart-title"><i class="fas fa-chart-line me-2"></i>Population Trend Over Time</h3>
+            <div id="population_trend" class="chart"></div>
+        </div>
+    </div>
+    
+    <!-- Borough Comparison Chart -->
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h3 class="chart-title"><i class="fas fa-city me-2"></i>Population by Borough</h3>
+            <div id="borough_comparison" class="chart"></div>
+        </div>
+    </div>
+    
+    <!-- Demographic Breakdown Chart -->
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h3 class="chart-title"><i class="fas fa-users me-2"></i>Population by Age Group</h3>
+            <div id="demographic_breakdown" class="chart"></div>
+        </div>
+    </div>
+    
+    <!-- Gender Distribution Chart -->
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h3 class="chart-title"><i class="fas fa-venus-mars me-2"></i>Population by Gender</h3>
+            <div id="gender_distribution" class="chart"></div>
+        </div>
+    </div>
+    
+    <!-- Migration Trends Chart -->
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h3 class="chart-title"><i class="fas fa-plane me-2"></i>Migration Trends</h3>
+            <div id="migration_trends" class="chart"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard info and help -->
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-body">
+        <h3 class="card-title">
+            <i class="fas fa-info-circle me-2"></i>About This Dashboard
+        </h3>
+        <p class="card-text">
+            This dashboard provides visualization of London's population and migration data. Use the filters above to customize the data view.
+            Charts will automatically update to reflect your selection criteria.
+        </p>
+        <p class="card-text">
+            <strong>Tips:</strong>
+        </p>
+        <div class="row">
+            <div class="col-md-6">
+                <ul>
+                    <li>Hover over chart elements to see detailed values</li>
+                    <li>Click on legend items to show/hide specific data series</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul>
+                    <li>Use the chart controls in the top-right of each chart for additional options (zoom, download as image, etc.)</li>
+                    <li>For more advanced data exploration, visit the <a href="{{ url_for('main.data') }}">Data</a> page</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Initialize charts -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load charts from JSON using a cleaner syntax
+        const chartData = {};
+        
+        try {
+            {% if charts and charts.population_trend %}
+                chartData.population_trend = {{ charts.population_trend | safe }};
+                console.log("Population trend chart data loaded");
+            {% else %}
+                console.log("No population trend chart data");
+                chartData.population_trend = {
+                    "data": [{"x": [], "y": [], "type": "scatter"}],
+                    "layout": {"title": "No data available"}
+                };
+            {% endif %}
+            
+            {% if charts and charts.borough_comparison %}
+                chartData.borough_comparison = {{ charts.borough_comparison | safe }};
+                console.log("Borough comparison chart data loaded");
+            {% else %}
+                console.log("No borough comparison chart data");
+                chartData.borough_comparison = {
+                    "data": [{"x": [], "y": [], "type": "bar"}],
+                    "layout": {"title": "No data available"}
+                };
+            {% endif %}
+            
+            {% if charts and charts.demographic_breakdown %}
+                chartData.demographic_breakdown = {{ charts.demographic_breakdown | safe }};
+                console.log("Demographic breakdown chart data loaded");
+            {% else %}
+                console.log("No demographic breakdown chart data");
+                chartData.demographic_breakdown = {
+                    "data": [{"labels": [], "values": [], "type": "pie", "hole": 0.4}],
+                    "layout": {"title": "No data available"}
+                };
+            {% endif %}
+            
+            {% if charts and charts.gender_distribution %}
+                chartData.gender_distribution = {{ charts.gender_distribution | safe }};
+                console.log("Gender distribution chart data loaded");
+            {% else %}
+                console.log("No gender distribution chart data");
+                chartData.gender_distribution = {
+                    "data": [{"x": [], "y": [], "type": "bar"}],
+                    "layout": {"title": "No data available"}
+                };
+            {% endif %}
+            
+            {% if charts and charts.migration_trends %}
+                chartData.migration_trends = {{ charts.migration_trends | safe }};
+                console.log("Migration trends chart data loaded");
+            {% else %}
+                console.log("No migration trends chart data");
+                chartData.migration_trends = {
+                    "data": [
+                        {"x": [], "y": [], "type": "bar", "name": "Immigration"},
+                        {"x": [], "y": [], "type": "bar", "name": "Emigration"},
+                        {"x": [], "y": [], "type": "scatter", "mode": "lines+markers", "name": "Net Migration"}
+                    ],
+                    "layout": {"title": "No data available"}
+                };
+            {% endif %}
+            
+            // Render each chart
+            Object.keys(chartData).forEach(function(chartId) {
+                const chartElement = document.getElementById(chartId);
+                if (chartElement) {
+                    try {
+                        console.log(`Rendering chart: ${chartId}`);
+                        // Check if already JSON parsed
+                        const plotData = typeof chartData[chartId] === 'string' ? 
+                            JSON.parse(chartData[chartId]) : chartData[chartId];
+                            
+                        // Add custom layout options
+                        if (plotData.layout) {
+                            // Apply custom template
+                            plotData.layout.template = 'plotly_white';
+                            // Add shadows and better appearance
+                            plotData.layout.margin = { l: 50, r: 50, t: 50, b: 50 };
+                            plotData.layout.paper_bgcolor = 'rgba(0,0,0,0)';
+                            plotData.layout.font = { family: 'Roboto, sans-serif' };
+                        }
+                        
+                        Plotly.newPlot(chartId, plotData.data, plotData.layout);
+                        console.log(`Chart ${chartId} rendered successfully`);
+                    } catch (e) {
+                        console.error(`Error rendering chart: ${chartId}`, e);
+                        // Display a fallback message in the chart container
+                        chartElement.innerHTML = `<div class="alert alert-warning">Unable to display chart. Error: ${e.message}</div>`;
+                    }
+                } else {
+                    console.error(`Chart element not found: ${chartId}`);
+                }
+            });
+        } catch (e) {
+            console.error("Error initializing charts:", e);
+        }
+        
+        // Make charts responsive
+        window.addEventListener('resize', function() {
+            Object.keys(chartData).forEach(function(chartId) {
+                const chartElement = document.getElementById(chartId);
+                if (chartElement && chartData[chartId] && Object.keys(chartData[chartId]).length > 0) {
+                    try {
+                        Plotly.relayout(chartId, {
+                            'xaxis.autorange': true,
+                            'yaxis.autorange': true
+                        });
+                    } catch (e) {
+                        console.error(`Error resizing chart: ${chartId}`, e);
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

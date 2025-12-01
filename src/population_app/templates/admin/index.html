@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="fw-bold">Admin Dashboard</h1>
+        <p class="lead">Manage population data, predictions, and system settings.</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">
+            Return to Website
+        </a>
+    </div>
+</div>
+
+<!-- Stats Overview -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-database mb-3 fs-1 text-primary"></i>
+                <h5 class="card-title">Total Records</h5>
+                <p class="display-6 mb-0 fw-bold">{{ stats.total_records | intcomma }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-map-marker-alt mb-3 fs-1 text-success"></i>
+                <h5 class="card-title">Locations</h5>
+                <p class="display-6 mb-0 fw-bold">{{ stats.locations }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-alt mb-3 fs-1 text-info"></i>
+                <h5 class="card-title">Years</h5>
+                <p class="display-6 mb-0 fw-bold">{{ stats.years }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line mb-3 fs-1 text-warning"></i>
+                <h5 class="card-title">Predictions</h5>
+                <p class="display-6 mb-0 fw-bold">{{ stats.predictions }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Admin Controls -->
+<div class="row g-4">
+    <!-- Data Upload Panel -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0">Upload Data Files</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('admin.upload') }}" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.data_file.id }}" class="form-label">Data File</label>
+                        {{ form.data_file(class="form-control") }}
+                        {% if form.data_file.errors %}
+                        <div class="text-danger">
+                            {% for error in form.data_file.errors %}
+                            <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.data_type.id }}" class="form-label">Data Type</label>
+                        {{ form.data_type(class="form-select") }}
+                    </div>
+                    
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+                
+                <div class="alert alert-info mt-4">
+                    <h6 class="alert-heading">Upload Guidelines</h6>
+                    <ul class="mb-0">
+                        <li>Files must be CSV or Excel format (.csv, .xlsx)</li>
+                        <li>Maximum file size: 10MB</li>
+                        <li>For population data, include: location, year, demographics, and values</li>
+                        <li>For location data, include: location code, name, and region data</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity Panel -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-secondary text-white py-3">
+                <h5 class="mb-0">Recent System Activity</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% if stats.recent_uploads %}
+                        {% for upload in stats.recent_uploads %}
+                        <div class="list-group-item border-0 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ upload.filename }}</h6>
+                                    <p class="mb-0 small text-muted">{{ upload.status }}</p>
+                                </div>
+                                <small class="text-muted">{{ upload.upload_date.strftime('%d %b %Y') }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="p-4 text-center">
+                            <p class="text-muted mb-0">No recent uploads</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-footer bg-white">
+                <div class="d-grid">
+                    <a href="{{ url_for('admin.admin_index') }}" class="btn btn-outline-secondary">
+                        View All Activity
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Links Panel -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white py-3">
+                <h5 class="mb-0">Admin Tools</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('admin.predictions') }}" class="list-group-item list-group-item-action border-0 border-bottom d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">Manage Predictions</h6>
+                            <p class="mb-0 small text-muted">Review and clean prediction data</p>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="{{ url_for('admin.chatbot_logs') }}" class="list-group-item list-group-item-action border-0 border-bottom d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">Chatbot Query Logs</h6>
+                            <p class="mb-0 small text-muted">View user queries and performance</p>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action border-0 border-bottom d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">Data Validation</h6>
+                            <p class="mb-0 small text-muted">Run consistency checks</p>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action border-0 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">System Configuration</h6>
+                            <p class="mb-0 small text-muted">Update system settings</p>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- System Status Panel -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white py-3">
+                <h5 class="mb-0">System Status</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-6">
+                        <h6>Database</h6>
+                        <div class="d-flex align-items-center">
+                            <div class="me-2 text-success">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <span>Connected</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h6>API Service</h6>
+                        <div class="d-flex align-items-center">
+                            <div class="me-2 text-success">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <span>Online</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-6">
+                        <h6>Database Size</h6>
+                        <p class="mb-0">{{ (stats.total_records * 0.001) | round(1) }} MB</p>
+                    </div>
+                    <div class="col-6">
+                        <h6>Last Update</h6>
+                        <p class="mb-0">{{ now.strftime('%d %b %Y, %H:%M') }}</p>
+                    </div>
+                </div>
+                
+                <div class="alert alert-warning mt-4 mb-0">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-exclamation-triangle fs-3"></i>
+                        </div>
+                        <div>
+                            <h6 class="alert-heading">Scheduled Maintenance</h6>
+                            <p class="mb-0">System maintenance scheduled for this Sunday, 2:00-4:00 AM BST. Some services may be unavailable during this time.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Trends & Predictions{% endblock %}
+
+{% block content %}
+<h1 class="mb-4 fw-bold">Population Trends & Predictions</h1>
+
+<div class="row g-4">
+    <!-- Prediction form panel -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-primary text-white py-3">
+                <h2 class="mb-0 h5">Generate Prediction</h2>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('main.trends') }}">
+                    {{ form.csrf_token }}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.location.id }}" class="form-label">Location</label>
+                        {{ form.location(class="form-select shadow-sm") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.demographic.id }}" class="form-label">Age Group</label>
+                        {{ form.demographic(class="form-select shadow-sm") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.gender.id }}" class="form-label">Gender</label>
+                        {{ form.gender(class="form-select shadow-sm") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.metric_type.id }}" class="form-label">Metric Type</label>
+                        {{ form.metric_type(class="form-select shadow-sm") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.years_ahead.id }}" class="form-label">Years to Predict</label>
+                        <div class="input-group">
+                            {{ form.years_ahead(class="form-control shadow-sm", min="1", max="20") }}
+                            <span class="input-group-text">years</span>
+                        </div>
+                        <div class="form-text">Enter a value between 1 and 20 years</div>
+                    </div>
+                    
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-chart-line me-2"></i>Generate Prediction
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="prediction-info">
+                    <h5 class="mb-3">About Our Predictions</h5>
+                    <p>
+                        Our prediction model uses polynomial regression to forecast future population trends based on historical data.
+                        The model analyzes past patterns to make educated projections about future values.
+                    </p>
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <p class="mb-0">
+                            <strong>Note:</strong> Predictions are estimates and should be used for informational purposes only.
+                            Many external factors can influence actual population changes that may not be captured in the model.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Prediction results -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                <h2 class="mb-0 h5">Prediction Results</h2>
+                {% if confidence %}
+                <span class="badge 
+                    {% if confidence == 'Very High' %}bg-success
+                    {% elif confidence == 'High' %}bg-primary
+                    {% elif confidence == 'Moderate' %}bg-info
+                    {% elif confidence == 'Low' %}bg-warning
+                    {% else %}bg-danger{% endif %}">
+                    Confidence: {{ confidence }}
+                </span>
+                {% endif %}
+            </div>
+            <div class="card-body p-4">
+                {% if prediction_chart %}
+                    <div id="prediction_chart" class="chart mb-4" style="height: 400px;"></div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {{ message }}
+                    </div>
+                    
+                    <div class="card mt-4 bg-light border-0">
+                        <div class="card-body">
+                            <h5 class="card-title">Understanding This Prediction</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="mb-0">
+                                        <li>The solid blue line represents historical data from our database.</li>
+                                        <li>The dashed red line shows the predicted future values based on our model.</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="mb-0">
+                                        <li>The light red shaded area represents the confidence interval of the prediction.</li>
+                                        <li>Predictions become less certain the further into the future they extend.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% elif message %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {{ message }}
+                    </div>
+                    <div class="no-prediction-container text-center p-5">
+                        <img src="{{ url_for('static', filename='img/prediction_placeholder.svg') }}" alt="Prediction" width="250" class="mb-4 opacity-50">
+                        <h3>Prediction Failed</h3>
+                        <p class="text-muted">
+                            Please try different parameters or make sure there is enough historical data.
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="no-prediction-container text-center p-5">
+                        <img src="{{ url_for('static', filename='img/prediction_placeholder.svg') }}" alt="Prediction" width="250" class="mb-4 opacity-50">
+                        <h3>No Prediction Generated Yet</h3>
+                        <p class="text-muted">
+                            Use the form on the left to select criteria and generate a population prediction.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional information section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-secondary bg-opacity-10 py-3">
+                <h2 class="mb-0 h5">About Population Forecasting</h2>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>
+                            Population forecasting is a critical tool for urban planning, public policy development, and resource allocation.
+                            By analyzing historical trends and current data, we can make informed estimates about future population characteristics.
+                        </p>
+                        <p>
+                            Our model considers several factors including historical population growth, migration patterns, and demographic changes.
+                            However, forecasts should be used as one of many tools for decision-making, as unpredictable events and policy changes
+                            can significantly alter actual outcomes.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mt-md-0 mt-3">Methodology</h5>
+                        <p>
+                            We use a polynomial regression model trained on historical data to make predictions. This type of model can capture
+                            non-linear patterns in population growth, making it suitable for demographic forecasting.
+                        </p>
+                        <p>
+                            For each prediction, we calculate:
+                        </p>
+                        <ul>
+                            <li>Projected values based on historical patterns</li>
+                            <li>Confidence intervals to represent prediction uncertainty</li>
+                            <li>Model reliability score to indicate prediction confidence level</li>
+                            <li>Relevant contextual information based on similar historical periods</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if prediction_chart %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Parse the JSON figure data
+        try {
+            const chartData = {{ prediction_chart | safe }};
+            
+            // Render the figure
+            Plotly.newPlot('prediction_chart', chartData);
+            
+            // Make chart responsive
+            window.addEventListener('resize', function() {
+                Plotly.relayout('prediction_chart', {
+                    'xaxis.autorange': true,
+                    'yaxis.autorange': true
+                });
+            });
+        } catch (error) {
+            console.error('Error rendering prediction chart:', error);
+            document.getElementById('prediction_chart').innerHTML = 
+                '<div class="alert alert-danger">Error rendering chart. Please try again.</div>';
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

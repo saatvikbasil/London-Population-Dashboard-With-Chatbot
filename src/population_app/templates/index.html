@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero section -->
+<section class="hero-section text-center mb-5">
+    <div class="container py-5 bg-primary text-white rounded shadow">
+        <h1 class="display-4 fw-bold">London Population & Immigration Data</h1>
+        <p class="lead mb-4">Explore comprehensive data on London's population trends, demographics, and immigration patterns.</p>
+        <div class="mt-4">
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-light btn-lg me-2">
+                <i class="fas fa-chart-line me-2"></i>Explore Dashboard
+            </a>
+            <a href="{{ url_for('main.data') }}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-database me-2"></i>View Raw Data
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Add this right after the hero section -->
+{% if db_error is defined and db_error %}
+<section class="container my-5">
+    <div class="alert alert-danger">
+        <h4 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Database Error</h4>
+        <p>
+            The application could not connect to or initialize the database. This may be because:
+        </p>
+        <ul>
+            <li>The population.db file is missing</li>
+            <li>The database exists but does not contain the required data</li>
+            <li>There was an error accessing the database</li>
+        </ul>
+        <p>
+            Please make sure that a properly populated database is available in the instance folder.
+            <br>Most functionality will be unavailable until this issue is resolved.
+        </p>
+    </div>
+</section>
+{% endif %}
+
+<!-- Key stats section -->
+<section class="container my-5">
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body py-4 bg-primary bg-opacity-10">
+                    <i class="fas fa-building mb-3 fs-1 text-info"></i>
+                    <h5 class="card-title">Total London Boroughs</h5>
+                    <p class="display-5 mb-0 fw-bold">{{ stats.location_count }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body py-4 bg-success bg-opacity-10">
+                    <i class="fas fa-calendar-alt mb-3 fs-1 text-success-light"></i>
+                    <h5 class="card-title">Data Year Range</h5>
+                    <p class="display-5 mb-0 fw-bold">{{ stats.year_range }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body py-4 bg-info bg-opacity-10">
+                    <i class="fas fa-users mb-3 fs-1 text-info"></i>
+                    <h5 class="card-title">Total Population</h5>
+                    <p class="display-5 mb-0 fw-bold">{{ stats.total_population }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features section -->
+<section class="container my-5">
+    <h2 class="text-center mb-4 fw-bold">Explore Our Features</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon rounded-circle bg-primary bg-opacity-10 p-3 mb-3 mx-auto">
+                        <i class="fas fa-chart-bar fs-2 text-info"></i>
+                    </div>
+                    <h5 class="card-title">Interactive Dashboard</h5>
+                    <p class="card-text">Visualize population trends with interactive charts and filters.</p>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary mt-auto">View Dashboard</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon rounded-circle bg-primary bg-opacity-10 p-3 mb-3 mx-auto">
+                        <i class="fas fa-chart-line fs-2 text-info"></i>
+                    </div>
+                    <h5 class="card-title">Trend Predictions</h5>
+                    <p class="card-text">See future population projections based on historical data.</p>
+                    <a href="{{ url_for('main.trends') }}" class="btn btn-primary mt-auto">View Predictions</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon rounded-circle bg-primary bg-opacity-10 p-3 mb-3 mx-auto">
+                        <i class="fas fa-robot fs-2 text-info"></i>
+                    </div>
+                    <h5 class="card-title">AI Chatbot</h5>
+                    <p class="card-text">Ask questions about London population data in natural language.</p>
+                    <a href="{{ url_for('main.chatbot') }}" class="btn btn-primary mt-auto">Chat Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4 g-4">
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon rounded-circle bg-primary bg-opacity-10 p-3 mb-3 mx-auto">
+                        <i class="fas fa-table fs-2 text-info"></i>
+                    </div>
+                    <h5 class="card-title">Data Export</h5>
+                    <p class="card-text">Filter and download population data in multiple formats for your research.</p>
+                    <a href="{{ url_for('main.data') }}" class="btn btn-primary mt-auto">Access Data</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon rounded-circle bg-primary bg-opacity-10 p-3 mb-3 mx-auto">
+                        <i class="fas fa-code fs-2 text-info"></i>
+                    </div>
+                    <h5 class="card-title">API Access</h5>
+                    <p class="card-text">Access London population data programmatically through our REST API.</p>
+                    <a href="{{ url_for('api_bp.api_status') }}" class="btn btn-primary mt-auto">API Documentation</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About section -->
+<section class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="card-title fw-bold mb-3">About This Project</h2>
+                    <p class="card-text">
+                        This web application provides access to comprehensive data on London's population and immigration statistics. 
+                        It offers historical trends, demographic breakdowns, and future projections. The data is presented through 
+                        interactive visualizations, downloadable datasets, and a natural language chatbot interface.
+                    </p>
+                    <p class="card-text">
+                        The application is designed for researchers, journalists, policymakers, and anyone interested in understanding 
+                        London's population dynamics and demographic changes over time.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+
+{% block title %}Upload Data{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Upload Population Data</h1>
+    <a href="{{ url_for('admin.admin_index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Admin
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h5 mb-0">Upload Data File</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.csrf_token }}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.data_file.id }}" class="form-label">Data File</label>
+                        {{ form.data_file(class="form-control") }}
+                        <div class="form-text">Upload CSV or Excel files only (max 10MB)</div>
+                        {% if form.data_file.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.data_file.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.data_type.id }}" class="form-label">Data Type</label>
+                        {{ form.data_type(class="form-select") }}
+                        <div class="form-text">Select the type of data being uploaded</div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h2 class="h5 mb-0">Upload Guidelines</h2>
+            </div>
+            <div class="card-body">
+                <h3 class="h6">File Format Requirements</h3>
+                <ul>
+                    <li>Files must be in CSV or Excel (.xlsx) format</li>
+                    <li>Maximum file size is 10MB</li>
+                    <li>The first row must contain column headers</li>
+                    <li>Required columns depend on the selected data type</li>
+                </ul>
+                
+                <h3 class="h6 mt-3">Column Requirements</h3>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Data Type</th>
+                                <th>Required Columns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Population Data</td>
+                                <td>location_id, demographic_id, gender_id, year_id, metric_id, value</td>
+                            </tr>
+                            <tr>
+                                <td>Location Data</td>
+                                <td>location_id, location_name, region (optional)</td>
+                            </tr>
+                            <tr>
+                                <td>Demographic Data</td>
+                                <td>demographic_id, age_group, description (optional)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Important:</strong> Uploading data with the same IDs will update existing records. Make sure your data is correct before uploading.
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="h5 mb-0">Sample Files</h2>
+            </div>
+            <div class="card-body">
+                <p>Download sample templates for reference:</p>
+                <div class="d-grid gap-2">
+                    <a href="#" class="btn btn-outline-success">
+                        <i class="fas fa-download me-2"></i>Population Data Template
+                    </a>
+                    <a href="#" class="btn btn-outline-success">
+                        <i class="fas fa-download me-2"></i>Location Data Template
+                    </a>
+                    <a href="#" class="btn btn-outline-success">
+                        <i class="fas fa-download me-2"></i>Demographic Data Template
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

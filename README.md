@@ -2,7 +2,7 @@
 
 # London Population Explorer - COMP0035 Coursework 02
 
-# NOTE: Github CI failure due to recent github changes to payment plans
+# Author: Saatvik Basil
 
 A Flask web application for exploring and analyzing London population and immigration data.
 
